@@ -1,0 +1,40 @@
+# .github/workflows/update-m3u-edgeone.yml
+
+name: Update M3U & Deploy to EdgeOne Pages
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Generate M3U
+        run: python json_to_m3u.py
+      - name: Prepare dist
+        run: |
+          mkdir -p dist
+          cp channels.m3u dist/
+          echo "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>IPTV</title></head><body><h1>IPTV Playlist</h1><p>Updated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')</p><a href=\"channels.m3u\">Download</a></body></html>" > dist/index.html
+      # 方式2A: 使用EdgeOne Pages CLI (teo) 部署
+      # - name: Install EdgeOne CLI
+      #   run: npm install -g @edgeone/teo-cli
+      # - name: Deploy
+      #   run: teo deploy --project-id ${{ secrets.EDGEONE_PROJECT_ID }} --token ${{ secrets.EDGEONE_TOKEN }}
+      # 方式2B: 使用腾讯云CLI部署
+      # - name: Setup TCCLI
+      #   run: pip install tccli
+      # - name: Deploy
+      #   env:
+      #     TENCENTCLOUD_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+      #     TENCENTCLOUD_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+      #   run: |
+      #     tccli configure set secretId $TENCENTCLOUD_SECRET_ID
+      #     tccli configure set secretKey $TENCENTCLOUD_SECRET_KEY
+      #     tccli teo deploy-pages --ProjectId ${{ secrets.EDGEONE_PROJECT_ID }} --Content dist/
