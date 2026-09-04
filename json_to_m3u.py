@@ -11,6 +11,14 @@ import json
 import sys
 import os
 
+# Python 2: 设置默认编码为 utf-8，并重定向 stdout
+if sys.version_info[0] == 2:
+    import codecs
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr)
+
 PY3 = sys.version_info[0] == 3
 
 if PY3:
@@ -21,7 +29,7 @@ if PY3:
 else:
     import urllib2
     from datetime import datetime, tzinfo, timedelta
-    
+
     class UTC(tzinfo):
         def utcoffset(self, dt):
             return timedelta(0)
@@ -29,7 +37,7 @@ else:
             return "UTC"
         def dst(self, dt):
             return timedelta(0)
-    
+
     tz = UTC()
     text_type = unicode
 
@@ -49,7 +57,8 @@ def to_text(val):
 
 def log(msg):
     now = datetime.now(tz).strftime('%Y-%m-%d %H:%M:%S UTC')
-    print(u"[{0}] {1}".format(now, to_text(msg)))
+    line = u"[{0}] {1}".format(now, to_text(msg))
+    print(line)
 
 
 def is_valid_url(url):
@@ -74,7 +83,7 @@ def get_sort_key(item):
 
 def fetch_json(url, timeout=30):
     log(u"正在获取数据: " + to_text(url))
-    
+
     req = urllib2.Request(
         to_text(url),
         headers={
@@ -84,16 +93,16 @@ def fetch_json(url, timeout=30):
             'Referer': 'http://gxtvepg.taipan.jda.bcs.ottcn.com:8080/',
         }
     )
-    
+
     try:
         response = urllib2.urlopen(req, timeout=timeout)
         status = response.getcode() if hasattr(response, 'getcode') else response.status
         if status != 200:
             reason = getattr(response, 'reason', 'Unknown')
             raise Exception(u"HTTP {0}: {1}".format(status, reason))
-        
+
         raw_data = response.read()
-        
+
         if PY3:
             for encoding in ['utf-8', 'gbk', 'gb2312', 'latin-1']:
                 try:
@@ -105,11 +114,11 @@ def fetch_json(url, timeout=30):
                 text = raw_data.decode('utf-8', errors='replace')
         else:
             text = raw_data.decode('utf-8', 'replace')
-        
+
         data = json.loads(text)
         log(u"数据获取成功")
         return data
-        
+
     except Exception as e:
         error_msg = to_text(e)
         if hasattr(e, 'code'):
@@ -126,53 +135,53 @@ def json_to_m3u(data, output_file='channels.m3u'):
     if not isinstance(data, list):
         log(u"错误: JSON数据应为列表格式")
         sys.exit(1)
-    
+
     log(u"共获取 " + to_text(len(data)) + u" 个频道")
-    
+
     data = sorted(data, key=get_sort_key)
-    
+
     lines = []
     lines.append(u'#EXTM3U url-tvg="' + EPG_URL + u'"')
-    
+
     converted_count = 0
     skipped_count = 0
-    
+
     for item in data:
         if item.get('usable') == 0:
             skipped_count += 1
             continue
-        
+
         channel_name = to_text(item.get('channelName', u'Unknown'))
         logo = to_text(item.get('logo', u''))
         channel_icon = to_text(item.get('channelIcon', u''))
         tvg_id = to_text(item.get('uuid', u'') or item.get('urlid', u''))
         chno = to_text(item.get('no', u''))
         play_url = to_text(item.get('livePlayUrl', u''))
-        
+
         tvg_logo = u''
         if is_valid_url(logo):
             tvg_logo = logo
         elif is_valid_url(channel_icon):
             tvg_logo = channel_icon
-        
+
         extinf_parts = [u'#EXTINF:-1']
-        
+
         if tvg_id:
             extinf_parts.append(u'tvg-id="' + tvg_id + u'"')
-        
+
         extinf_parts.append(u'tvg-name="' + channel_name + u'"')
-        
+
         if tvg_logo:
             extinf_parts.append(u'tvg-logo="' + tvg_logo + u'"')
-        
+
         if chno:
             extinf_parts.append(u'tvg-chno="' + chno + u'"')
-        
+
         extinf_line = u' '.join(extinf_parts) + u',' + channel_name
         lines.append(extinf_line)
         lines.append(play_url)
         converted_count += 1
-    
+
     try:
         content = u"\n".join(lines) + u"\n"
         with open(output_file, 'wb') as f:
