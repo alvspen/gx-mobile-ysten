@@ -1,0 +1,40 @@
+# .github/workflows/update-m3u-cloudflare.yml
+
+name: Update M3U & Deploy to Cloudflare Pages
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Generate M3U
+        run: python json_to_m3u.py
+      - name: Prepare dist
+        run: |
+          mkdir -p dist
+          cp channels.m3u dist/
+          echo "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>IPTV</title></head><body><h1>IPTV Playlist</h1><p>Updated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')</p><a href=\"channels.m3u\">Download</a></body></html>" > dist/index.html
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          api-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          account-id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          project-name: iptv-m3u
+          directory: dist
+      - name: Commit M3U
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add channels.m3u
+          git diff --staged --quiet || git commit -m "Update M3U - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          git push
