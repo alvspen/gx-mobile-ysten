@@ -491,6 +491,10 @@ http://cdnrrs.gx.chinamobile.com/PLTV/77777777/224/3221226410/index.m3u8?service
 http://cdnrrs.gx.chinamobile.com/PLTV/77777777/224/3221226422/index.m3u8?servicetype=1
 #EXTINF:-1 tvg-id="GXGD-H265-5500k-ygw" tvg-name="优购物" tvg-logo="http://images.center.bcs.ottcn.com:8080/images/ysten/images/ysten/TV/GXGD-H265-5500k-ygw/GX0617YGWTB.png" tvg-chno="659",优购物
 http://cdnrrs.gx.chinamobile.com/PLTV/77777777/224/3221226425/index.m3u8?servicetype=1
+#EXTINF:-1 tvg-id="XKDHD-GX-4000k-1080P-ybjk" tvg-name="怡伴健康" tvg-logo="http://images.center.bcs.ottcn.com:8080/images/ysten/images/ysten/TV/ljiankangyouyue/JSXBYXTB0705V1.png" tvg-chno="660",怡伴健康
+http://cdnrrs.gx.chinamobile.com/PLTV/77777777/224//index.m3u8?servicetype=1
+#EXTINF:-1 tvg-id="XKDHD-GX-4000k-1080P-jpmc" tvg-name="精品萌宠" tvg-logo="http://images.center.bcs.ottcn.com:8080/images/ysten/images/ysten/TV/jingpinmc/JPMRYXTB8952.png" tvg-chno="661",精品萌宠
+http://cdnrrs.gx.chinamobile.com/PLTV/77777777/224//index.m3u8?servicetype=1
 #EXTINF:-1 tvg-id="GXGD-H265-5500k-kkdh" tvg-name="卡酷动画" tvg-chno="662",卡酷动画
 http://cdnrrs.gx.chinamobile.com/PLTV/77777777/224/3221226419/index.m3u8?servicetype=1
 #EXTINF:-1 tvg-id="H265-4000k-1080P-cctv2" tvg-name="H265-CCTV-2高清4M" tvg-logo="http://images.center.bcs.ottcn.com:8080/images/ysten/images/ysten/TV/HD-8000k-1080P-cctv2/cctv-2gq4xtb.png" tvg-chno="663",H265-CCTV-2高清4M
